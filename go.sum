@@ -177,6 +177,8 @@ github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ
 github.com/sirupsen/logrus v1.9.3/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/stdyum/api-common v0.0.0-20240227162356-9a0d96ec237f h1:Nq1pUbvNbCWJnHDXdaVHZ0R6dK+CKAIWr7BlY/pxQU0=
 github.com/stdyum/api-common v0.0.0-20240227162356-9a0d96ec237f/go.mod h1:FEIxtSxi9baKqtucvCjB2jV4a2vrWcnDtZLc12seCR0=
+github.com/stdyum/api-common v0.0.0-20240229060835-307c4b986722 h1:acQSYwlq/+xqWNUdieZL7Y0tQf5Hx3N6teidTtxrE1g=
+github.com/stdyum/api-common v0.0.0-20240229060835-307c4b986722/go.mod h1:FEIxtSxi9baKqtucvCjB2jV4a2vrWcnDtZLc12seCR0=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/objx v0.5.0/go.mod h1:Yh+to48EsGEfYuaHDzXPcE3xhTkx73EhmCGUpEOglKo=
