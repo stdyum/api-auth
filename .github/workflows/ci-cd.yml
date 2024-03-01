@@ -28,6 +28,7 @@ jobs:
       - name: Deploying service
         uses: appleboy/ssh-action@v1.0.3
         with:
+          username: ${{ secrets.AWS_USER }}
           host: ${{ secrets.AWS_HOST }}
           key: ${{ secrets.AWS_KEY }}
           port: 22
