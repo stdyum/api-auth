@@ -13,7 +13,7 @@ require (
 	github.com/robfig/cron v1.2.0
 	github.com/segmentio/kafka-go v0.4.47
 	github.com/sirupsen/logrus v1.9.3
-	github.com/stdyum/api-common v0.0.0-20240229060835-307c4b986722
+	github.com/stdyum/api-common v0.0.0-20240302174919-44ee5554a313
 	go.mongodb.org/mongo-driver v1.7.5
 	golang.org/x/crypto v0.17.0
 	google.golang.org/grpc v1.61.0
