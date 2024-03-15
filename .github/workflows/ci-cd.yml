@@ -33,4 +33,4 @@ jobs:
           host: ${{ secrets.AWS_HOST }}
           key: ${{ secrets.AWS_KEY }}
           port: 22
-          script: cd StudyumDeploy && ./update.sh backend auth
+          script: cd deploy && ./update.sh backend auth
