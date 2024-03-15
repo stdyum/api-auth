@@ -15,6 +15,7 @@ func (h *http) ConfigureRoutes() *hc.Engine {
 
 	group.POST("signup", h.SignUp)
 	group.POST("login", h.Login)
+	group.GET("self", h.GetSelfUser)
 
 	group.POST("token/update", h.UpdateToken)
 

@@ -3,36 +3,37 @@ package controllers
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/stdyum/api-auth/internal/app/dto"
 	"github.com/stdyum/api-auth/internal/app/entities"
-	"github.com/stdyum/api-auth/internal/app/models"
+	appModels "github.com/stdyum/api-auth/internal/app/models"
 	"github.com/stdyum/api-auth/pkg/hash"
 	jwt "github.com/stdyum/api-auth/pkg/jwt/entities"
+	"github.com/stdyum/api-auth/pkg/jwt/repositories"
+	"github.com/stdyum/api-common/errors"
+	"github.com/stdyum/api-common/models"
 	"github.com/stdyum/api-common/modules/notifications"
-	"github.com/stdyum/api-common/proto/impl/auth"
 )
 
-func (c *controller) CreateJWTClaims(ctx context.Context, id string, userIDRaw string) (models.Claims, error) {
+func (c *controller) CreateJWTClaims(ctx context.Context, id string, userIDRaw string) (appModels.Claims, error) {
 	userID, err := uuid.Parse(userIDRaw)
 	if err != nil {
-		return models.Claims{}, err
+		return appModels.Claims{}, err
 	}
 
 	user, err := c.repository.GetUserByID(ctx, userID)
 	if err != nil {
-		return models.Claims{}, err
+		return appModels.Claims{}, err
 	}
 
 	if err = c.encryption.Decrypt(&user); err != nil {
-		return models.Claims{}, err
+		return appModels.Claims{}, err
 	}
 
-	claims := models.Claims{
+	claims := appModels.Claims{
 		IDClaims: jwt.IDClaims{
 			ID: id,
 		},
@@ -149,6 +150,20 @@ func (c *controller) Login(ctx context.Context, requestDTO dto.LoginRequestDTO) 
 	return responseDTO, nil
 }
 
+func (c *controller) Self(ctx context.Context, token string) (dto.ResponseUserDTO, error) {
+	user, err := c.Auth(ctx, token)
+	if err != nil {
+		return dto.ResponseUserDTO{}, err
+	}
+
+	return dto.ResponseUserDTO{
+		ID:      user.ID,
+		Email:   user.Email,
+		Login:   user.Login,
+		Picture: user.PictureUrl,
+	}, err
+}
+
 func (c *controller) ConfirmEmailByCode(ctx context.Context, requestDTO dto.ConfirmEmailByCodeRequestDTO) error {
 	userId, err := c.confirmationCodes.GetUserIdByCode(ctx, requestDTO.Code)
 	if err != nil {
@@ -232,6 +247,10 @@ func (c *controller) ResetPasswordByCode(ctx context.Context, requestDTO dto.Res
 func (c *controller) UpdateToken(ctx context.Context, request dto.UpdateTokenRequestDTO) (dto.UpdateTokenResponseDTO, error) {
 	tokens, err := c.jwt.UpdateTokensByRefresh(ctx, request.Token, "0.0.0.0")
 	if err != nil {
+		if errors.Is(repositories.NotValidRefreshTokenErr, err) {
+			return dto.UpdateTokenResponseDTO{}, errors.Wrap(ErrUnauthorized, err)
+		}
+
 		return dto.UpdateTokenResponseDTO{}, err
 	}
 
@@ -240,28 +259,32 @@ func (c *controller) UpdateToken(ctx context.Context, request dto.UpdateTokenReq
 	}, nil
 }
 
-func (c *controller) Auth(ctx context.Context, token string) (*auth.User, error) {
+func (c *controller) Auth(ctx context.Context, token string) (models.User, error) {
 	claims, err := c.jwt.ValidateAccess(ctx, token)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", err.Error(), ErrUnauthorized)
+		return models.User{}, fmt.Errorf("%s: %w", err.Error(), ErrUnauthorized)
 	}
 
 	user, err := c.repository.GetUserByID(ctx, claims.Claims.UserId)
 	if err != nil {
-		return nil, err
+		if errors.Is(sql.ErrNoRows, err) {
+			return models.User{}, errors.WrapString(ErrUnauthorized, "user does not exist")
+		}
+
+		return models.User{}, err
 	}
 
 	if err = c.encryption.Decrypt(&user); err != nil {
-		return nil, err
+		return models.User{}, err
 	}
 
-	userRpc := auth.User{
-		Id:            user.ID.String(),
+	u := models.User{
+		ID:            user.ID,
 		Login:         user.Login,
 		PictureUrl:    user.Picture,
 		Email:         user.Email,
 		VerifiedEmail: user.VerifiedEmail,
 	}
 
-	return &userRpc, nil
+	return u, nil
 }

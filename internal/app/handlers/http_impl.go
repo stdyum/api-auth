@@ -39,6 +39,17 @@ func (h *http) Login(ctx *hc.Context) {
 	ctx.JSON(netHttp.StatusOK, responseDTO)
 }
 
+func (h *http) GetSelfUser(ctx *hc.Context) {
+	token := ctx.GetHeader("Authorization")
+	user, err := h.controller.Self(ctx, token)
+	if err != nil {
+		_ = ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(netHttp.StatusOK, user)
+}
+
 func (h *http) UpdateToken(ctx *hc.Context) {
 	var requestDTO dto.UpdateTokenRequestDTO
 	if err := ctx.BindJSON(&requestDTO); err != nil {

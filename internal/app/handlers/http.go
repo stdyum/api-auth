@@ -11,6 +11,8 @@ type HTTP interface {
 
 	SignUp(ctx *hc.Context)
 	Login(ctx *hc.Context)
+	GetSelfUser(ctx *hc.Context)
+
 	UpdateToken(ctx *hc.Context)
 
 	ConfirmEmailByCode(ctx *hc.Context)
