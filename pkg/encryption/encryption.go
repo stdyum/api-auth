@@ -6,9 +6,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"reflect"
+
+	"github.com/pkg/errors"
 )
 
 type Encryption interface {
@@ -71,8 +72,12 @@ func (e *encryption) DecryptString(s string, salt bool) (string, error) {
 		ciphertext = append(make([]byte, aes.BlockSize), ciphertext...)
 	}
 
-	if len(ciphertext) <= aes.BlockSize {
+	if len(ciphertext) < aes.BlockSize {
 		return "", errors.New("chipper less than block size")
+	}
+
+	if len(ciphertext) == aes.BlockSize {
+		return "", nil
 	}
 
 	iv := ciphertext[:aes.BlockSize]

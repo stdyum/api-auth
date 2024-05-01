@@ -2,6 +2,10 @@ package controllers
 
 import (
 	"context"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/pkg/errors"
 	"github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
@@ -9,9 +13,6 @@ import (
 	"github.com/stdyum/api-auth/pkg/jwt/entities"
 	"github.com/stdyum/api-auth/pkg/jwt/repositories"
 	"github.com/stdyum/api-auth/pkg/jwt/utils"
-	"strconv"
-	"strings"
-	"time"
 )
 
 var (
@@ -78,8 +79,8 @@ func (c *controller[C]) CreateWithTime(ctx context.Context, ip string, userID st
 	if c.createClaimsFunc == nil {
 		return entities.TokenPair{}, errors.New("createClaimsFunc is nil")
 	}
-	claims, err := c.createClaimsFunc(ctx, id, userID)
 
+	claims, err := c.createClaimsFunc(ctx, id, userID)
 	if err != nil {
 		return entities.TokenPair{}, err
 	}
