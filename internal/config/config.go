@@ -14,6 +14,8 @@ type Model struct {
 	Redis              RedisConfig              `env:"REDIS"`
 	NotificationsKafka NotificationsKafkaConfig `env:"KAFKA_NOTIFICATIONS"`
 	JWT                JWTConfig                `env:"JWT"`
+	OAuth              OAuthConfig              `env:"OAUTH"`
+	CallbackURL        string                   `env:"CALLBACK_URL"`
 }
 
 func init() {

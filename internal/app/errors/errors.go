@@ -1,11 +1,12 @@
 package errors
 
 import (
+	"net/http"
+
 	"github.com/stdyum/api-auth/internal/app/controllers"
 	grpcErr "github.com/stdyum/api-common/grpc"
 	httpErr "github.com/stdyum/api-common/http"
 	"google.golang.org/grpc/codes"
-	"net/http"
 )
 
 var (

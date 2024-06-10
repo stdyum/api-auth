@@ -13,6 +13,9 @@ func (h *http) ConfigureRoutes() *hc.Engine {
 	group := engine.Group("api/v1")
 	group.Use(hc.Logger(), hc.Recovery(), middlewares.ErrorMiddleware())
 
+	group.GET("auth/oauth2/:provider", h.AuthViaOAuth2)
+	group.GET("auth/oauth2/:provider/callback", h.AuthViaOAuth2Callback)
+
 	group.POST("signup", h.SignUp)
 	group.POST("login", h.Login)
 	group.GET("self", h.GetSelfUser)

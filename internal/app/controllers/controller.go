@@ -11,6 +11,7 @@ import (
 	"github.com/stdyum/api-auth/internal/modules/notifications"
 	"github.com/stdyum/api-auth/pkg/encryption"
 	jwt "github.com/stdyum/api-auth/pkg/jwt/controllers"
+	jwtEntities "github.com/stdyum/api-auth/pkg/jwt/entities"
 	"github.com/stdyum/api-common/models"
 )
 
@@ -21,6 +22,9 @@ var (
 
 type Controller interface {
 	CreateJWTClaims(ctx context.Context, id string, userID string) (appModels.Claims, error)
+
+	AuthViaOAuth2(ctx context.Context, request dto.AuthViaOAuth2Request) (string, error)
+	AuthViaOAuth2Callback(ctx context.Context, request dto.AuthViaOAuth2CallbackRequest) (jwtEntities.TokenPair, error)
 
 	SignUp(ctx context.Context, requestDTO dto.SignUpRequestDTO) (dto.SignUpResponseDTO, error)
 	Login(ctx context.Context, requestDTO dto.LoginRequestDTO) (dto.LoginResponseDTO, error)

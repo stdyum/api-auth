@@ -1,5 +1,18 @@
 package dto
 
+import (
+	"time"
+)
+
+type AuthViaOAuth2Request struct {
+	Provider string `json:"provider"`
+}
+
+type AuthViaOAuth2CallbackRequest struct {
+	Provider string `json:"provider"`
+	Code     string `json:"code"`
+}
+
 type SignUpRequestDTO struct {
 	Email    string `json:"email"`
 	Login    string `json:"login"`
@@ -8,8 +21,9 @@ type SignUpRequestDTO struct {
 }
 
 type LoginRequestDTO struct {
-	Login    string `json:"login"`
-	Password string `json:"password"`
+	Login               string    `json:"login"`
+	Password            string    `json:"password"`
+	SessionExpirationAt time.Time `json:"sessionExpirationAt"`
 }
 
 type ConfirmEmailByCodeRequestDTO struct {

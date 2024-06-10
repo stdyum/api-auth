@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
+
 	"github.com/google/uuid"
 	"github.com/stdyum/api-auth/internal/app/entities"
 )
@@ -38,6 +39,15 @@ func (r *repository) GetUserByLoginAndEmail(ctx context.Context, login string, e
 	SELECT id, email, verified_email, login, password, picture FROM users
 		WHERE login = $1 AND email = $2 
 	`, login, email)
+
+	return r.rowToUser(row)
+}
+
+func (r *repository) GetUserByEmail(ctx context.Context, email string) (entities.User, error) {
+	row := r.database.QueryRowContext(ctx, `
+	SELECT id, email, verified_email, login, password, picture FROM users
+		WHERE email = $1 
+	`, email)
 
 	return r.rowToUser(row)
 }

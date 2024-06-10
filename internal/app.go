@@ -59,7 +59,7 @@ func App() error {
 		return err
 	}
 
-	routes, err := app.New(jwt, encrypt, notificationsModule, confirmationCodesModule, resetCodesModule, db)
+	routes, err := app.New(jwt, encrypt, config.Config.OAuth, config.Config.CallbackURL, notificationsModule, confirmationCodesModule, resetCodesModule, db)
 	if err != nil {
 		return err
 	}

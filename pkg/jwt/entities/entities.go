@@ -1,13 +1,14 @@
 package entities
 
 import (
-	"github.com/golang-jwt/jwt"
 	"time"
+
+	"github.com/golang-jwt/jwt"
 )
 
 type TokenPair struct {
 	Access  string `json:"access" bson:"access"`
-	Refresh string `json:"refresh" bson:"refresh"`
+	Refresh string `json:"refresh,omitempty" bson:"refresh"`
 }
 
 type IIDClaims interface {

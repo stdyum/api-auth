@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -44,6 +45,44 @@ func (c *controller) CreateJWTClaims(ctx context.Context, id string, userIDRaw s
 		VerifiedEmail: user.VerifiedEmail,
 	}
 	return claims, nil
+}
+
+func (c *controller) AuthViaOAuth2(ctx context.Context, request dto.AuthViaOAuth2Request) (string, error) {
+	return c.repository.AuthViaOAuth2(ctx, request.Provider)
+}
+
+func (c *controller) AuthViaOAuth2Callback(ctx context.Context, request dto.AuthViaOAuth2CallbackRequest) (jwt.TokenPair, error) {
+	oauthUser, err := c.repository.GetUserDataFromOAuth2Token(ctx, request.Provider, request.Code)
+	if err != nil {
+		return jwt.TokenPair{}, err
+	}
+
+	encryptedEmail, err := c.encryption.EncryptString(oauthUser.Email, false)
+	if err != nil {
+		return jwt.TokenPair{}, err
+	}
+
+	user, err := c.repository.GetUserByEmail(ctx, encryptedEmail)
+	if errors.Is(sql.ErrNoRows, err) {
+		user = entities.User{
+			ID:            uuid.New(),
+			Email:         oauthUser.Email,
+			VerifiedEmail: true,
+			Login:         oauthUser.Name,
+			Picture:       oauthUser.Picture,
+		}
+
+		encryptedUser := user
+		if err = c.encryption.Encrypt(&encryptedUser); err != nil {
+			return jwt.TokenPair{}, err
+		}
+
+		if err = c.repository.CreateUser(ctx, encryptedUser); err != nil {
+			return jwt.TokenPair{}, err
+		}
+	}
+
+	return c.jwt.Create(ctx, "0.0.0.0", user.ID.String())
 }
 
 func (c *controller) SignUp(ctx context.Context, requestDTO dto.SignUpRequestDTO) (dto.SignUpResponseDTO, error) {
@@ -132,7 +171,12 @@ func (c *controller) Login(ctx context.Context, requestDTO dto.LoginRequestDTO) 
 		return dto.LoginResponseDTO{}, fmt.Errorf("%s: %w", "incorrect login or password", ErrValidation)
 	}
 
-	tokenPair, err := c.jwt.Create(ctx, "0.0.0.0", user.ID.String())
+	var tokenPair jwt.TokenPair
+	if requestDTO.SessionExpirationAt.Before(time.Now()) {
+		tokenPair, err = c.jwt.Create(ctx, "0.0.0.0", user.ID.String())
+	} else {
+		tokenPair.Access, err = c.jwt.CreateAccessWithExpireTime(ctx, "0.0.0.0", user.ID.String(), requestDTO.SessionExpirationAt)
+	}
 	if err != nil {
 		return dto.LoginResponseDTO{}, err
 	}

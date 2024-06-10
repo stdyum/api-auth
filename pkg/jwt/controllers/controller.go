@@ -22,6 +22,7 @@ var (
 
 type Controller[C entities.IIDClaims] interface {
 	Create(ctx context.Context, ip string, userID string) (entities.TokenPair, error)
+	CreateAccessWithExpireTime(ctx context.Context, ip string, userID string, expireAt time.Time) (string, error)
 	CreateWithTime(ctx context.Context, ip string, userID string, d time.Duration) (entities.TokenPair, error)
 
 	ValidateAccess(ctx context.Context, token string) (entities.BaseClaims[C], error)
@@ -105,6 +106,27 @@ func (c *controller[C]) CreateWithTime(ctx context.Context, ip string, userID st
 	}
 
 	return pair, nil
+}
+
+func (c *controller[C]) CreateAccessWithExpireTime(ctx context.Context, _ string, userID string, expireAt time.Time) (string, error) {
+	//839_299_365_868_340_224
+	id := utils.RandomString(10)
+
+	if c.createClaimsFunc == nil {
+		return "", errors.New("createClaimsFunc is nil")
+	}
+
+	claims, err := c.createClaimsFunc(ctx, id, userID)
+	if err != nil {
+		return "", err
+	}
+
+	pair, err := c.jwt.GeneratePairWithExpireTime(claims, expireAt.Sub(time.Now()))
+	if err != nil {
+		return "", err
+	}
+
+	return pair.Access, nil
 }
 
 func (c *controller[C]) ValidateAccess(_ context.Context, token string) (entities.BaseClaims[C], error) {

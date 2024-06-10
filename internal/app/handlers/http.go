@@ -9,6 +9,9 @@ import (
 type HTTP interface {
 	confHttp.Routes
 
+	AuthViaOAuth2(ctx *hc.Context)
+	AuthViaOAuth2Callback(ctx *hc.Context)
+
 	SignUp(ctx *hc.Context)
 	Login(ctx *hc.Context)
 	GetSelfUser(ctx *hc.Context)
@@ -22,11 +25,13 @@ type HTTP interface {
 }
 
 type http struct {
-	controller controllers.Controller
+	controller  controllers.Controller
+	redirectURL string
 }
 
-func NewHTTP(controller controllers.Controller) HTTP {
+func NewHTTP(controller controllers.Controller, redirectURL string) HTTP {
 	return &http{
-		controller: controller,
+		controller:  controller,
+		redirectURL: redirectURL,
 	}
 }

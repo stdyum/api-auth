@@ -1,11 +1,42 @@
 package handlers
 
 import (
+	netHttp "net/http"
+
 	"github.com/stdyum/api-auth/internal/app/dto"
 	"github.com/stdyum/api-common/hc"
-
-	netHttp "net/http"
 )
+
+func (h *http) AuthViaOAuth2(ctx *hc.Context) {
+	request := dto.AuthViaOAuth2Request{
+		Provider: ctx.Param("provider"),
+	}
+
+	redirectURL, err := h.controller.AuthViaOAuth2(ctx, request)
+	if err != nil {
+		_ = ctx.Error(err)
+		return
+	}
+
+	ctx.Redirect(netHttp.StatusTemporaryRedirect, redirectURL)
+}
+
+func (h *http) AuthViaOAuth2Callback(ctx *hc.Context) {
+	request := dto.AuthViaOAuth2CallbackRequest{
+		Provider: ctx.Param("provider"),
+		Code:     ctx.Query("code"),
+	}
+
+	tokens, err := h.controller.AuthViaOAuth2Callback(ctx, request)
+	if err != nil {
+		_ = ctx.Error(err)
+		return
+	}
+
+	query := "?access=" + tokens.Access + "&refresh=" + tokens.Refresh
+
+	ctx.Redirect(netHttp.StatusTemporaryRedirect, "http://localhost:4200/callback"+query)
+}
 
 func (h *http) SignUp(ctx *hc.Context) {
 	var signUpDTO dto.SignUpRequestDTO
