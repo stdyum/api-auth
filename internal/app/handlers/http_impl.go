@@ -35,7 +35,7 @@ func (h *http) AuthViaOAuth2Callback(ctx *hc.Context) {
 
 	query := "?access=" + tokens.Access + "&refresh=" + tokens.Refresh
 
-	ctx.Redirect(netHttp.StatusTemporaryRedirect, "http://localhost:4200/callback"+query)
+	ctx.Redirect(netHttp.StatusTemporaryRedirect, h.redirectURL+query)
 }
 
 func (h *http) SignUp(ctx *hc.Context) {
